@@ -1,94 +1,85 @@
-# 🏠 HomeAI Canada
+# HouseWise 🏠
 
-A cutting-edge real estate platform combining interactive property search with AI-powered assistance to revolutionize home buying in Canada. Built with Next.js 13+, React, and TypeScript, featuring real-time property data and intelligent chat support.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-13+-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-13+-black)
-![React](https://img.shields.io/badge/React-18-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+> A modern real estate platform combining interactive property mapping with AI assistance for the Canadian market.
 
 ## ✨ Features
 
-- **Interactive Property Map** 
-  - Real-time property markers
-  - Custom filtering by price/beds/baths
-  - Detailed property cards on click
+- **Interactive Property Map**
+  - 🗺️ Real-time property visualization
+  - 🏷️ Dynamic price markers
+  - 🔍 Area-based search
+  - 📱 Responsive design
 
 - **AI Chat Assistant**
-  - Property-specific inquiries
-  - Market insights and advice
-  - Natural language search
-  - Conversation history
+  - 🤖 Property-specific insights
+  - 💬 Real-time market advice
+  - 📝 Search history
+  - 🔄 Context-aware responses
 
 - **Advanced Search**
-  - Multi-parameter filtering
-  - Save search preferences
-  - Real-time results
+  - 🎯 Multi-parameter filtering
+  - 💾 Save search preferences
+  - ⚡ Real-time updates
+  - 📊 Price analytics
 
-## 🛠 Tech Stack
-
-- **Frontend Framework**: Next.js 13+
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS, shadcn/ui
-- **Map Integration**: Leaflet with OpenStreetMap
-- **AI Integration**: Groq AI
-- **State Management**: React Hooks
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18.0 or later
-- npm or yarn
-- Git
+```bash
+node >= 18.0.0
+npm >= 9.0.0
+```
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repo
 ```bash
-git clone https://github.com/yourusername/homeai-canada.git
-cd homeai-canada
+git clone https://github.com/SAMUR274/houseWise_1.git
+cd houseWise_1
 ```
 
-2. Install dependencies
+2. Install NPM packages
 ```bash
 npm install
 ```
 
-3. Set up environment variables
+3. Create environment file
 ```bash
 cp .env.example .env.local
 ```
 
-4. Add your API keys to `.env.local`:
-```plaintext
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
+4. Add your environment variables
+```env
 GROQ_API_KEY=your_groq_api_key
 ```
 
-5. Start the development server
+5. Start development server
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` to see the application.
+## 🛠️ Built With
 
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GROQ_API_KEY` | Groq AI API key for chat functionality | Yes |
-| `NEXT_PUBLIC_MAPBOX_TOKEN` | Mapbox token for map visualization | No |
+- [Next.js 13+](https://nextjs.org/) - React Framework
+- [TypeScript](https://www.typescriptlang.org/) - Programming Language
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [shadcn/ui](https://ui.shadcn.com/) - UI Components
+- [Leaflet](https://leafletjs.com/) - Mapping Library
+- [Groq](https://groq.com/) - AI Integration
 
 ## 📁 Project Structure
 
 ```
-homeai-canada/
 ├── app/
 │   ├── api/
 │   │   └── chat/
+│   │       └── route.ts
 │   ├── components/
 │   │   ├── AiChat.tsx
 │   │   ├── PropertyMap.tsx
@@ -103,9 +94,10 @@ homeai-canada/
     └── index.ts
 ```
 
-## 🖥 Core Components
+## 🔧 Core Components
 
-### PropertyMap
+### PropertyMap Component
+
 ```typescript
 interface PropertyMapProps {
   properties: Property[];
@@ -113,7 +105,8 @@ interface PropertyMapProps {
 }
 ```
 
-### AiChat
+### AiChat Component
+
 ```typescript
 interface AiChatProps {
   selectedProperty?: Property;
@@ -122,12 +115,13 @@ interface AiChatProps {
 }
 ```
 
-## 🔄 API Routes
+## 📡 API Endpoints
 
-### Chat Endpoint
-- **Route**: `/api/chat`
-- **Method**: POST
-- **Body**:
+### Chat API
+
+**Endpoint:** `/api/chat`  
+**Method:** POST  
+**Body:**
 ```typescript
 {
   message: string;
@@ -135,11 +129,11 @@ interface AiChatProps {
     id: string;
     address: string;
     price: number;
-  };
+  }
 }
 ```
 
-## 📝 Scripts
+## 📜 Available Scripts
 
 ```bash
 # Development
@@ -151,44 +145,42 @@ npm run build
 # Production
 npm start
 
-# Type checking
-npm run type-check
-
 # Linting
 npm run lint
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch
+1. Fork the Project
+2. Create your Feature Branch
 ```bash
 git checkout -b feature/AmazingFeature
 ```
-3. Commit your changes
+3. Commit your Changes
 ```bash
 git commit -m 'Add some AmazingFeature'
 ```
-4. Push to the branch
+4. Push to the Branch
 ```bash
 git push origin feature/AmazingFeature
 ```
 5. Open a Pull Request
 
-## 📜 License
+## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 👥 Project Links
+
+- Repository: [https://github.com/SAMUR274/houseWise_1.git](https://github.com/SAMUR274/houseWise_1.git)
+- Issues: [https://github.com/SAMUR274/houseWise_1/issues](https://github.com/SAMUR274/houseWise_1/issues)
 
 ## 🙏 Acknowledgments
 
-- OpenStreetMap for map data
-- shadcn/ui for UI components
-- Groq AI for chat capabilities
-
-## 📮 Contact
-
-Project Link: [[https://github.com/yourusername/homeai-canada](https://github.com/SAMUR274/houseWise_1.git)]([https://github.com/yourusername/homeai-canada](https://github.com/SAMUR274/houseWise_1.git))
+* [OpenStreetMap](https://www.openstreetmap.org/) for map data
+* [shadcn/ui](https://ui.shadcn.com/) for UI components
+* [Groq](https://groq.com/) for AI capabilities
 
 ---
 
-Built with ❤️ by [Your Name]
+<p align="center">Made with ❤️ in Canada</p>
