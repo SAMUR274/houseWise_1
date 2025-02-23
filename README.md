@@ -187,7 +187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📮 Contact
 
-Project Link: [https://github.com/yourusername/homeai-canada](https://github.com/yourusername/homeai-canada)
+Project Link: [[https://github.com/yourusername/homeai-canada](https://github.com/SAMUR274/houseWise_1.git)]([https://github.com/yourusername/homeai-canada](https://github.com/SAMUR274/houseWise_1.git))
 
 ---
 
