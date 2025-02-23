@@ -6,9 +6,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const ZILLOW_API_URL = process.env.ZILLOW_API_URL;
-const ZILLOW_API_KEY = process.env.ZILLOW_API_KEY;
-const ZILLOW_API_HOST = process.env.ZILLOW_API_HOST;
+const REPLIERS_API_URL = process.env.REPLIERS_API_URL;
+const REPLIERS_API_KEY = process.env.REPLIERS_API_KEY;
 
 // Dynamic mock data generation
 const createMockProperties = (location: string) => [{
@@ -20,18 +19,20 @@ const createMockProperties = (location: string) => [{
   sqft: 2000,
   images: ['/api/placeholder/800/600'],
   propertyType: 'House',
-  yearBuilt: 2010
+  yearBuilt: 2010,
+  latitude: 43.6532,
+  longitude: -79.3832
 }];
 
 async function extractQueryInfo(query: string) {
   const prompt = `
     Extract the following structured information from the real estate query:
     - "location": The city or area the user is interested in.
-    - "price": The maximum price the user is willing to pay (numeric value).
-    - "bedrooms": The number of bedrooms the user is looking for (numeric value).
-    - "bathrooms": The number of bathrooms the user is looking for (numeric value).
-    - "square_feet": The minimum square footage the user is looking for (numeric value).
-    - "home_type": The type of home (Houses, Apartments, Condos, Townhomes, Multi-family, Manufactured, LotsLand).
+    - "price_min": The minimum price (numeric value).
+    - "price_max": The maximum price (numeric value).
+    - "beds_min": The minimum number of bedrooms (numeric value).
+    - "baths_min": The minimum number of bathrooms (numeric value).
+    - "propertyType": The type of property (Detached, Semi-Detached, Townhouse, Condo).
     
     If any field is not explicitly mentioned in the query, set its value to null.
     Query: "${query}"
@@ -40,7 +41,7 @@ async function extractQueryInfo(query: string) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: "You extract structured data from real estate queries." },
         { role: "user", content: prompt }
@@ -49,7 +50,6 @@ async function extractQueryInfo(query: string) {
     });
 
     const responseContent = completion.choices[0].message.content?.trim() || '{}';
-    
     let jsonResponse = responseContent;
     if (responseContent.startsWith("```json")) {
       jsonResponse = responseContent.slice(7, -3).trim();
@@ -60,69 +60,47 @@ async function extractQueryInfo(query: string) {
     return JSON.parse(jsonResponse);
   } catch (error) {
     console.error('Error extracting query info:', error);
-    return { location: query }; // Fallback to using raw query as location
+    return { location: query };
   }
 }
 
 async function searchProperties(params: {
   location?: string;
-  home_type?: string;
-  price?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  square_feet?: number;
+  price_min?: number;
+  price_max?: number;
+  beds_min?: number;
+  baths_min?: number;
+  propertyType?: string;
 }) {
   try {
     if (!params.location) {
       throw new Error('Location is required for property search');
     }
 
-    console.log('Making API request with params:', {
-      location: params.location,
-      home_type: params.home_type,
-      price_max: params.price,
-      beds_min: params.bedrooms,
-      baths_min: params.bathrooms,
-      sqft_min: params.square_feet
-    });
-
     const headers = {
-      'X-RapidAPI-Key': ZILLOW_API_KEY!,
-      'X-RapidAPI-Host': ZILLOW_API_HOST!,
-      'Content-Type': 'application/json'
+    "accept": "application/json",
+    "content-type": "application/json",
+    "REPLIERS-API-KEY": "yOcZlNOgdLtF0lvK5RyDpNFNCRL61g"
     };
 
-    const response = await axios.get(ZILLOW_API_URL!, {
-      headers,
-      params: {
-        location: params.location,
-        home_type: params.home_type || undefined,
-        price_max: params.price || undefined,
-        beds_min: params.bedrooms || undefined,
-        baths_min: params.bathrooms || undefined,
-        sqft_min: params.square_feet || undefined,
-        status_type: 'ForSale'
-      }
-    });
+    let apiUrl = `${REPLIERS_API_URL}&city=${encodeURIComponent(params.location)}`;
+    
+    if (params.price_min) apiUrl += `&price_min=${params.price_min}`;
+    if (params.price_max) apiUrl += `&price_max=${params.price_max}`;
+    if (params.beds_min) apiUrl += `&beds_min=${params.beds_min}`;
+    if (params.baths_min) apiUrl += `&baths_min=${params.baths_min}`;
+    if (params.propertyType) apiUrl += `&propertyType=${encodeURIComponent(params.propertyType)}`;
 
-    console.log('API response status:', response.status);
-    console.log('Properties found:', response.data?.properties?.length || 0);
-
+    const response = await axios.get(apiUrl, { headers });
     return response.data;
   } catch (error: any) {
-    console.error("Property search error:", {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
+    console.error("Property search error:", error.response?.data || error.message);
     return null;
   }
 }
 
 export async function POST(req: Request) {
   try {
-    // Get and validate query
     const { query } = await req.json();
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
@@ -131,8 +109,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check API keys early
-    if (!process.env.OPENAI_API_KEY || !process.env.ZILLOW_API_KEY || !process.env.ZILLOW_API_HOST) {
+    if (!process.env.OPENAI_API_KEY || !process.env.REPLIERS_API_KEY) {
       console.warn('Missing API keys - falling back to mock data');
       const mockData = createMockProperties(query);
       return NextResponse.json({
@@ -143,15 +120,12 @@ export async function POST(req: Request) {
       });
     }
 
-    // Extract search parameters
     const searchParams = await extractQueryInfo(query);
     console.log('Extracted search params:', searchParams);
 
-    // Search properties
     const searchResults = await searchProperties(searchParams);
 
-    // Handle failed search
-    if (!searchResults?.properties) {
+    if (!searchResults?.listings) {
       const mockData = createMockProperties(searchParams.location);
       return NextResponse.json({
         properties: mockData,
@@ -161,29 +135,21 @@ export async function POST(req: Request) {
       });
     }
 
-    // Map API response to our Property interface
-    const properties = searchResults.properties.map((prop: {
-      id?: string | number;
-      address?: string;
-      price?: string | number;
-      bedrooms?: string | number;
-      bathrooms?: string | number;
-      square_feet?: string | number;
-      images?: string[];
-      home_type?: string;
-      year_built?: string | number;
-    }) => ({
-      id: prop.id?.toString() || Math.random().toString(36).slice(2),
-      address: prop.address || 'Address not available',
-      price: Number(prop.price) || 0,
-      bedrooms: Number(prop.bedrooms) || 0,
-      bathrooms: Number(prop.bathrooms) || 0,
-      sqft: Number(prop.square_feet) || 0,
-      images: Array.isArray(prop.images) ? prop.images : ['/api/placeholder/800/600'],
-      propertyType: prop.home_type || 'Not specified',
-      yearBuilt: prop.year_built ? Number(prop.year_built) : undefined
+    const properties = searchResults.listings.map((listing: any) => ({
+      id: listing.listingId?.toString() || Math.random().toString(36).slice(2),
+      address: listing.address ? `${listing.address.streetNumber || ''} ${listing.address.streetName || ''}, ${listing.address.city || ''}, ${listing.address.province || ''}` : 'Address not available',
+      price: Number(listing.listPrice) || 0,
+      bedrooms: Number(listing.details?.bedrooms) || 0,
+      bathrooms: Number(listing.details?.bathrooms) || 0,
+      sqft: Number(listing.details?.sqft) || 0,
+      images: Array.isArray(listing.photos) ? listing.photos : ['/api/placeholder/800/600'],
+      propertyType: listing.details?.propertyType || 'Not specified',
+      yearBuilt: listing.details?.yearBuilt ? Number(listing.details.yearBuilt) : undefined,
+      latitude: Number(listing.address?.latitude) || 0,
+      longitude: Number(listing.address?.longitude) || 0
     }));
-
+    // Add debug logging
+    console.log('First property data:', searchResults.listings[0]);
     return NextResponse.json({
       properties,
       total: properties.length,
