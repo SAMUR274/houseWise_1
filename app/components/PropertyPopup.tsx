@@ -5,7 +5,7 @@ import { PropertyPopupProps } from '../lib/mapTypes';
 
 export default function PropertyPopup({ property, onClose }: PropertyPopupProps) {
   return (
-    <Popup
+    <Popup>
       <div className="p-4 max-w-sm">
         <h3 className="text-lg font-semibold mb-2">${property.price.toLocaleString()}</h3>
         <p className="text-gray-600 mb-2">{property.address}</p>
